@@ -1,0 +1,11 @@
+[project]
+name = "crackmes-extractor"
+version = "1.0"
+description = "Scrapes challs from crackmes.one"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "lxml>=6.0.2",
+    "requests>=2.32.5",
+]
