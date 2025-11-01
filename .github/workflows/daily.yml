@@ -1,0 +1,49 @@
+name: Update crackmes daily
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  daily-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Sync dependencies with uv
+      run: uv sync
+
+    - name: Run scraper script
+      run: |
+        uv run scraper.py --dump-htmls --extract-challs
+
+    - name: Verify and move challs.min.json
+      run: |
+        if [ -f "dumps/challs.min.json" ]; then
+          mv dumps/challs.min.json .
+          echo "Successfully moved challs.min.json to root"
+        else
+          echo "dumps/challs.min.json not found!"
+          exit 1
+        fi
+
+    - name: Commit and push if changed
+      run: |
+        git config --local user.name 'github-actions[bot]'
+        git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git add challs.min.json
+        git diff --staged --quiet || git commit -m "chore: update challs.min.json [automated]"
+        git push
