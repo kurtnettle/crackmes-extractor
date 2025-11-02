@@ -203,10 +203,11 @@ def build_challs_json():
             logger.error("%s: Error processing %s", file_name, e)
             continue
 
+    data["challs"] = sorted(data["challs"], key=lambda x: x['date'])
     data["last_updated"] = datetime.now(timezone.utc).isoformat()
     challs_json = dump_folder / "challs.min.json"
     with challs_json.open("w") as f:
-        f.write(dumps(data))
+        f.write(dumps(data, indent=2))
 
     logger.info(
         "Extracted %d challenges from %d html files and written challs.min.json",
